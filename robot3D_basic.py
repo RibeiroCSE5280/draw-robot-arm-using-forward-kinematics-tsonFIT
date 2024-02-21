@@ -4,9 +4,8 @@
 
 from vedo import *
 
-
 def RotationMatrix(theta, axis_name):
-    """ calculate single rotation of \(\theta\) matrix around x,y or z
+    """ calculate single rotation of $theta$ matrix around x,y or z
         code from: https://programming-surgeon.com/en/euler-angle-python-en/
     input
         theta = rotation angle(degrees)
@@ -104,8 +103,6 @@ def getLocalFrameMatrix(R_ij, t_ij):
                      [np.zeros((1, 3)),       1]])
     
     return T_ij
-
-
 	
 
 def main():
@@ -211,6 +208,7 @@ def main():
 	# Show everything 
 	show([Frame1, Frame2, Frame3], axes, viewup="z").close()
 	
+
 
 
 if __name__ == '__main__':
