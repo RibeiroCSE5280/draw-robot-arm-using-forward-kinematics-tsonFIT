@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-
 from vedo import *
-import matplotlib as plt
-
+import imageio
 
 def RotationMatrix(theta, axis_name):
     """ calculate single rotation of $theta$ matrix around x,y or z
@@ -145,7 +142,7 @@ def forward_kinematics(p1, l1, l2, l3, l4, phi):
     frames.append(frame_two)
 
     R_23 = RotationMatrix(phi[2], axis_name='y')
-    t_23 = np.array([[0.0], [0.0], [l2 + 0.4]])
+    t_23 = np.array([[0.0], [0.0], [l2 + 0.8]])
     T_23 = getLocalFrameMatrix(R_23, t_23)
 
     T_03 = T_02 @ T_23
@@ -163,16 +160,33 @@ def forward_kinematics(p1, l1, l2, l3, l4, phi):
     frames.append(frame_three)
 
     R_34 = RotationMatrix(phi[3], axis_name='y')
-    t_34 = np.array([[0.0], [0.0], [l3 + 0.4]])
+    t_34 = np.array([[0.0], [0.0], [l3 + 0.8]])
     T_34 = getLocalFrameMatrix(R_34, t_34)
 
     T_04 = T_03 @ T_34
 
     frame_four_arrows = createCoordinateFrameMesh()
-    sphere = Sphere(r=0).pos(0, 0, 0).color("grey").alpha(.8)
-    frame_four = frame_four_arrows + sphere
+    link_four_mesh = Cylinder(r=0.4,
+                              height=l4,
+                              pos=(0, 0, l4 / 2 + 0.4),
+                              c="green",
+                              alpha=.8,
+                              axis=(0, 0, 1)
+                              )
+    frame_four = frame_four_arrows + link_four_mesh + sphere
     frame_four.apply_transform(T_04)
     frames.append(frame_four)
+
+    t_45 = np.array([[0.0], [0.0], [l4 + 0.4]])
+    T_45 = getLocalFrameMatrix(np.identity(3), t_45)
+
+    T_05 = T_04 @ T_45
+
+    frame_five_arrows = createCoordinateFrameMesh()
+    sphere = Sphere(r=0).pos(0, 0, 0).color("grey").alpha(.8)
+    frame_five = frame_five_arrows + sphere
+    frame_five.apply_transform(T_05)
+    frames.append(frame_five)
 
     return frames
 
@@ -187,15 +201,17 @@ def plot_frames(frames):
 
 
 def animate_frames(p1, l1, l2, l3, l4, phi):
+    images = []
     for i in range(0, 10, 5):
         phis = [phi[0], i, 0, 0]
         frames = forward_kinematics(p1, l1, l2, l3, l4, phis)
         base = createCoordinateFrameMesh()
         frames.insert(0, base)
         plt = Plotter(offscreen=True)
-        axes = Axes(xrange=(0, 20), yrange=(-2, 10), zrange=(0, 6))
+        axes = Axes(xrange=(0, 20), yrange=(-2, 10), zrange=(0, 30))
         plt.show(frames, axes, viewup=[1, 1, 1])
-        screenshot('screen_i_%02d.png' % i)
+        screenshot('screen_body1_%02d.png' % i)
+        images.append(imageio.v2.imread('screen_body1_%02d.png' % i))
 
     for i in range(0, 30, 5):
         phis = [phi[0], 10, i, 0]
@@ -203,25 +219,28 @@ def animate_frames(p1, l1, l2, l3, l4, phi):
         base = createCoordinateFrameMesh()
         frames.insert(0, base)
         plt = Plotter(offscreen=True)
-        axes = Axes(xrange=(0, 20), yrange=(-2, 10), zrange=(0, 6))
+        axes = Axes(xrange=(0, 20), yrange=(-2, 10), zrange=(0, 30))
         plt.show(frames, axes, viewup=[1, 1, 1])
-        screenshot('screen_i_%02d.png' % i)
+        screenshot('screen_body2_%02d.png' % i)
+        images.append(imageio.v2.imread('screen_body2_%02d.png' % i))
 
     for i in range(0, 50, 5):
-        phis = [phi[0], 10, 30, i*5]
+        phis = [phi[0], 10, 30, i]
         frames = forward_kinematics(p1, l1, l2, l3, l4, phis)
         base = createCoordinateFrameMesh()
         frames.insert(0, base)
         plt = Plotter(offscreen=True)
-        axes = Axes(xrange=(-10, 10), yrange=(-10, 10), zrange=(0, 10))
+        axes = Axes(xrange=(-10, 10), yrange=(-10, 10), zrange=(0, 30))
         plt.show(frames, axes, viewup=[1, 1, 1])
-        screenshot('screen_i_%02d.png' % i)
+        screenshot('screen_end_%02d.png' % i)
+        images.append(imageio.v2.imread('screen_end_%02d.png' % i))
+    imageio.mimwrite('Robot_Animation.gif', images)
 
 
 def main():
     p1 = np.array([[3.0], [2.0], [0.0]])
     l1, l2, l3, l4 = [5, 8, 3, 4]
-    phi = [120, 50, 60, 45]
+    phi = [30, 50, 60, 45]
 
     # frames = forward_kinematics(p1, l1, l2, l3, l4, phi)
     # plot_frames(frames)
