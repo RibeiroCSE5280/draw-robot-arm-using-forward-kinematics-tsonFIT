@@ -1,10 +1,13 @@
 jupyterlab
 nbclient
 pandas
-importnb
-cvxopt
+importnb~=2023.11.1
+cvxopt~=1.3.2
 matplotlib
-vedo
+vedo~=2024.5.1
 
 
 
+
+imageio~=2.34.0
+numpy~=1.24.2
